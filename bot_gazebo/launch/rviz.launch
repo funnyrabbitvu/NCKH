@@ -1,0 +1,16 @@
+<launch>
+    <arg name="model" default="$(find xacro)/xacro.py '$(find bot_gazebo)/urdf/bot.xacro'"/>
+    <arg name="gui" default="false" />
+    <arg name="rvizconfig" default="$(find bot_gazebo)/rviz/bot.rviz" />
+
+    <param name="robot_description" command="$(find xacro)/xacro.py '$(find bot_gazebo)/urdf/bot.xacro'"/>
+    <param name="use_gui" value="$(arg gui)"/>
+
+    <node pkg="bot_gazebo" type="keyboard_vel_controller.py" name="keyboard_vel_controller"
+        output="screen" />
+    <node pkg="bot_gazebo" type="model_robot" name="model_robot"/>
+
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
+</launch>

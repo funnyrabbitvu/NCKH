@@ -1,0 +1,40 @@
+<launch>
+    <!-- Rviz -->
+    <arg name="model" default="$(find xacro)/xacro.py '$(find bot_gazebo)/urdf/bot.xacro'"/>
+    <arg name="gui" default="false" />
+    <arg name="rvizconfig" default="$(find bot_gazebo)/rviz/bot.rviz" />
+
+    <!-- View model in Rviz -->
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
+
+    <!-- set the first position of robot in Gazebo -->
+    <arg name="x_pos" default="0.0"/>
+    <arg name="y_pos" default="0.0"/>
+    <arg name="z_pos" default="0.0"/>
+
+    <!-- Gazebo world -->
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="world_name" value="$(find bot_gazebo)/worlds/indoor_world.world"/>
+        <arg name="paused" value="false"/>
+        <arg name="use_sim_time" value="true"/>
+        <arg name="gui" value="true"/>
+        <arg name="headless" value="false"/>
+        <arg name="debug" value="false"/>
+        <arg name="output" value="log"/>
+    </include>
+    
+    <!-- Spawn model in Gazebo -->
+    <param name="robot_description" command="$(find xacro)/xacro.py '$(find bot_gazebo)/urdf/bot.xacro'"/>
+    <param name="use_gui" value="$(arg gui)"/>
+
+    <node name="spawn_model" pkg="gazebo_ros" type="spawn_model"
+        	args="-urdf -param robot_description -model model -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos)"/>
+
+    <!-- Control robot -->
+    <node pkg="bot_gazebo" type="keyboard_vel_controller.py" name="keyboard_vel_controller"
+        output="screen" />
+    <node pkg="bot_gazebo" type="model_robot" name="model_robot"/>
+    
+</launch>
